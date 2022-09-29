@@ -4,42 +4,50 @@ import NeoVis from 'neovis.js/dist/neovis.js';
 
 // const loading = ref(true);
 
-async function draw() {
-  const config = {
-    containerId: "viz",
-    neo4j: {
-      serverUrl: "bolt://3.237.80.101:7687",
-      serverUser: "neo4j",
-      serverPassword: "trucks-occasion-braids",
-    },
-    labels: {
-      Character: {
-        label: "name",
-        value: "pagerank",
-        group: "community",
-        [NeoVis.NEOVIS_ADVANCED_CONFIG]: {
-          function: {
-            title: (node) => viz.nodeToHtml(node, [
-              "name",
-              "pagerank"
-            ])
-          }
+const neoViz = null;
+// const viz = null;
+
+const cypher = ref("");
+
+const config = {
+  containerId: "viz",
+  neo4j: {
+    serverUrl: "****************",
+    serverUser: "neo4j",
+    serverPassword: "*********************",
+  },
+  labels: {
+    Character: {
+      label: "name",
+      value: "pagerank",
+      group: "community",
+      [NeoVis.NEOVIS_ADVANCED_CONFIG]: {
+        function: {
+          title: (node) => viz.nodeToHtml(node, [
+            "name",
+            "pagerank"
+          ])
         }
       }
-    },
-    relationships: {
-      INTERACTS: {
-        value: "weight"
-      }
-    },
-    initialCypher: "MATCH (n)-[r:INTERACTS]->(m) RETURN * LIMIT 100"
-  };
+    }
+  },
+  relationships: {
+    INTERACTS: {
+      value: "weight"
+    }
+  },
+  initialCypher: "MATCH p = (:Character)-[:INTERACTS]->(:Character) RETURN p LIMIT 100;"
+};
 
-  const neoViz = await new NeoVis(config);
-  neoViz.render();
+const query = () => {
+  const neoViz = new NeoVis(config);
+  neoViz.renderWithCypher(cypher.value);
 }
 
-// draw()
+const draw = () => {
+  const neoViz = new NeoVis(config);
+  neoViz.render();
+}
 
 onMounted(() => draw())
 
@@ -104,6 +112,14 @@ const count = ref(0)
   </div>
   <h1>Graph below</h1>
   <div id="viz"></div>
+  <div>
+    Cypher query: <el-input type="textarea" rows="4" cols=50 v-model="cypher"></el-input><br />
+  </div>
+  <br>
+  <div>
+    <el-button @click="query">Query</el-button>
+    <el-button @click="draw">Draw </el-button>
+  </div>
 </template>
 
 <style scoped>
