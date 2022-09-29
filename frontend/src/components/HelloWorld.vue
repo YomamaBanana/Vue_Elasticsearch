@@ -1,40 +1,121 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import NeoVis from 'neovis.js/dist/neovis.js';
+
+// const loading = ref(true);
+
+async function draw() {
+  const config = {
+    containerId: "viz",
+    neo4j: {
+      serverUrl: "bolt://3.237.80.101:7687",
+      serverUser: "neo4j",
+      serverPassword: "trucks-occasion-braids",
+    },
+    labels: {
+      Character: {
+        label: "name",
+        value: "pagerank",
+        group: "community",
+        [NeoVis.NEOVIS_ADVANCED_CONFIG]: {
+          function: {
+            title: (node) => viz.nodeToHtml(node, [
+              "name",
+              "pagerank"
+            ])
+          }
+        }
+      }
+    },
+    relationships: {
+      INTERACTS: {
+        value: "weight"
+      }
+    },
+    initialCypher: "MATCH (n)-[r:INTERACTS]->(m) RETURN * LIMIT 100"
+  };
+
+  const neoViz = await new NeoVis(config);
+  neoViz.render();
+}
+
+// draw()
+
+onMounted(() => draw())
 
 defineProps({
   msg: String
 })
 
+const tableData = [
+  {
+    date: '2016-05-03',
+    name: 'Tom',
+    address: 'No. 189, Grove St, Los Angeles',
+  },
+  {
+    date: '2016-05-02',
+    name: 'Tom',
+    address: 'No. 189, Grove St, Los Angeles',
+  },
+  {
+    date: '2016-05-04',
+    name: 'Tom',
+    address: 'No. 189, Grove St, Los Angeles',
+  },
+  {
+    date: '2016-05-01',
+    name: 'Tom',
+    address: 'No. 189, Grove St, Los Angeles',
+  },
+]
+
 const count = ref(0)
 </script>
 
 <template>
-  <h1>{{ msg }}</h1>
+  <div>
+    <h1>{{ msg }}</h1>
 
-  <div class="card">
-    <button type="button" @click="count++">count is {{ count }}</button>
+    <div class="card">
+      <button type="button" @click="count++">count is {{ count }}</button>
+      <p>
+        Edit
+        <code>components/HelloWorld.vue</code> to test HMR
+      </p>
+    </div>
+
     <p>
-      Edit
-      <code>components/HelloWorld.vue</code> to test HMR
+      Check out
+      <a href="https://vuejs.org/guide/quick-start.html#local" target="_blank">create-vue</a>, the official Vue + Vite
+      starter
     </p>
+    <p>
+      Install
+      <a href="https://github.com/johnsoncodehk/volar" target="_blank">Volar</a>
+      in your IDE for a better DX
+    </p>
+    <p class="read-the-docs">Click on the Vite and Vue logos to learn more</p>
+    <!-- <el-table class="table" :data="tableData" style="width: 100%">
+      <el-table-column prop="date" label="Date" width="180" />
+      <el-table-column prop="name" label="Name" width="180" />
+      <el-table-column prop="address" label="Address" />
+    </el-table> -->
   </div>
-
-  <p>
-    Check out
-    <a href="https://vuejs.org/guide/quick-start.html#local" target="_blank"
-      >create-vue</a
-    >, the official Vue + Vite starter
-  </p>
-  <p>
-    Install
-    <a href="https://github.com/johnsoncodehk/volar" target="_blank">Volar</a>
-    in your IDE for a better DX
-  </p>
-  <p class="read-the-docs">Click on the Vite and Vue logos to learn more</p>
+  <h1>Graph below</h1>
+  <div id="viz"></div>
 </template>
 
 <style scoped>
 .read-the-docs {
   color: #888;
+}
+
+.el-table {
+  /* --el-table-border: 10px solid red; */
+  --el-table-row-hover-bg-color: red;
+  background-color: red !important;
+  color: yellow;
+  cursor: pointer;
 }
 </style>
